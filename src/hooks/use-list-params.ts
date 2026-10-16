@@ -51,13 +51,20 @@ export function useListParams<S extends z.ZodType>(schema: S) {
     [query, pathname, router],
   );
 
-  /** Remove all filters but keep the page size the user chose. */
+  /**
+   * Remove all filters but keep the page size the user chose — optionally
+   * applying a fresh set of filters in the same navigation (used by "Ask").
+   */
   const clearParams = useCallback(
-    (keep: string[] = ['limit']) => {
+    (keep: string[] = ['limit'], apply: Record<string, ParamValue> = {}) => {
       const next = new URLSearchParams();
       for (const key of keep) {
         const value = searchParams.get(key);
         if (value) next.set(key, value);
+      }
+      for (const [key, value] of Object.entries(apply)) {
+        const empty = value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0);
+        if (!empty) next.set(key, Array.isArray(value) ? value.join(',') : String(value));
       }
       const qs = next.toString();
       router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });

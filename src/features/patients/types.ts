@@ -28,6 +28,9 @@ export type PatientListQuery = {
   condition?: string[];
   severity?: string[];
   status?: string[];
+  gender?: string[];
+  ageMin?: number;
+  ageMax?: number;
   from?: string;
   to?: string;
   sort?: string;

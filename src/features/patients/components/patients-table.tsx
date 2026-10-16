@@ -1,6 +1,6 @@
 'use client';
 
-import { MoreHorizontalIcon, PencilIcon, SearchXIcon, Trash2Icon, UsersIcon } from 'lucide-react';
+import { MoreHorizontalIcon, PencilIcon, SearchXIcon, Trash2Icon, UsersIcon, XIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState, type ReactNode } from 'react';
 import { DataTable, type Column } from '@/components/data-table/data-table';
@@ -21,6 +21,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useIsAdmin } from '@/features/auth/hooks';
 import { toOptions, useMeta } from '@/features/meta/hooks';
+import { AskBar } from '@/features/ai/components/ask-bar';
+import { ageLabel, describePatientFilters } from '@/features/ai/describe-filters';
 import { useListParams } from '@/hooks/use-list-params';
 import { formatDate } from '@/lib/format';
 import { GENDER, SEVERITY, SEVERITY_VALUES, STATUS, STATUS_VALUES } from '../constants';
@@ -55,7 +57,17 @@ export function PatientsTable({ doctorId, emptyAction }: PatientsTableProps) {
   }, [params, meta.data]);
 
   const patients = usePatients(query, doctorId);
-  const isFiltered = Boolean(query.search || query.condition.length || query.severity.length || query.status.length || query.from || query.to);
+  const ageText = ageLabel(query.ageMin, query.ageMax);
+  const isFiltered = Boolean(
+    query.search ||
+      query.condition.length ||
+      query.severity.length ||
+      query.status.length ||
+      query.gender.length ||
+      ageText ||
+      query.from ||
+      query.to,
+  );
 
   const openPatient = (id: string) => setParams({ patient: id }, { resetPage: false });
   const closePatient = () => setParams({ patient: undefined }, { resetPage: false, history: 'replace' });
@@ -142,6 +154,12 @@ export function PatientsTable({ doctorId, emptyAction }: PatientsTableProps) {
 
   return (
     <div>
+      <AskBar
+        scope="patients"
+        placeholder={'Ask, e.g. “critical diabetic women over 60 admitted last month”'}
+        onApply={(filters) => clearParams(['limit'], filters)}
+        describe={describePatientFilters}
+      />
       <DataTableToolbar isFiltered={isFiltered} onReset={() => clearParams()}>
         <SearchInput
           value={query.search}
@@ -157,6 +175,19 @@ export function PatientsTable({ doctorId, emptyAction }: PatientsTableProps) {
         <FacetedFilter title="Severity" options={severityOptions} selected={query.severity} onChange={(severity) => setParams({ severity })} />
         <FacetedFilter title="Status" options={statusOptions} selected={query.status} onChange={(status) => setParams({ status })} />
         <DateRangeFilter title="Admitted" from={query.from} to={query.to} onChange={({ from, to }) => setParams({ from, to })} />
+        {/* Filters without a dedicated control (set via Ask) stay visible and removable. */}
+        {query.gender.length > 0 && (
+          <Button variant="secondary" size="sm" className="h-8" onClick={() => setParams({ gender: [] })} aria-label="Remove gender filter">
+            Gender: {query.gender.map((g) => GENDER[g]).join(', ')}
+            <XIcon />
+          </Button>
+        )}
+        {ageText && (
+          <Button variant="secondary" size="sm" className="h-8" onClick={() => setParams({ ageMin: undefined, ageMax: undefined })} aria-label="Remove age filter">
+            {ageText}
+            <XIcon />
+          </Button>
+        )}
       </DataTableToolbar>
 
       {patients.isError && !patients.data ? (

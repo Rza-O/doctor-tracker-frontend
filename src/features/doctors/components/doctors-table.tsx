@@ -14,6 +14,8 @@ import { EmptyState } from '@/components/empty-state';
 import { ErrorState } from '@/components/states';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { AskBar } from '@/features/ai/components/ask-bar';
+import { describeDoctorFilters } from '@/features/ai/describe-filters';
 import { useListParams } from '@/hooks/use-list-params';
 import { formatDate, formatNumber } from '@/lib/format';
 import { toOptions, useMeta } from '@/features/meta/hooks';
@@ -115,6 +117,12 @@ export function DoctorsTable() {
 
   return (
     <div>
+      <AskBar
+        scope="doctors"
+        placeholder={'Ask, e.g. “cardiologists and neurologists at Gulshan General Hospital”'}
+        onApply={(filters) => clearParams(['limit'], filters)}
+        describe={describeDoctorFilters}
+      />
       <DataTableToolbar isFiltered={isFiltered} onReset={() => clearParams()}>
         <SearchInput
           value={query.search}
