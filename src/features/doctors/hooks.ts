@@ -1,6 +1,6 @@
 'use client';
 
-import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import * as doctorsApi from './api';
 import type { DoctorListQuery } from './types';
@@ -38,6 +38,23 @@ export function useDoctors(query: DoctorListQuery) {
   }, [query, totalPages, queryClient]);
 
   return result;
+}
+
+export function useCreateDoctor() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: doctorsApi.createDoctor,
+    onSuccess: async (doctor) => {
+      // Seed the detail cache so opening the new doctor is instant…
+      queryClient.setQueryData(doctorKeys.detail(doctor._id), doctor);
+      // …and refresh every cached doctor list (any filter/page could now differ),
+      // plus /meta in case this introduced a new hospital for the filters.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: doctorKeys.lists() }),
+        queryClient.invalidateQueries({ queryKey: ['meta'] }),
+      ]);
+    },
+  });
 }
 
 export function useDoctor(id: string) {
