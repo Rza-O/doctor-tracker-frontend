@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { useStats } from '../hooks';
 import type { DashboardStats } from '../types';
 import { RANGES, statsUrlSchema } from '../url-schema';
+import { InsightsCard } from '@/features/ai/components/insights-card';
 import { AdmissionsChart } from './admissions-chart';
 import { ConditionBreakdown, SpecialtyBreakdown, TopDoctors } from './breakdowns';
 import { PatientMix } from './patient-mix';
@@ -77,6 +78,11 @@ export function DashboardView() {
         </div>
 
         <div className={cn('grid gap-4 transition-opacity lg:grid-cols-3', refreshing && 'opacity-60')} aria-busy={refreshing}>
+          <InsightsCard
+            range={params.range}
+            periodLabel={RANGES.find((r) => r.value === params.range)?.label ?? ''}
+            className="lg:col-span-3"
+          />
           <AdmissionsChart series={s.admissionsOverTime} className="lg:col-span-2" />
           <PatientMix stats={s} />
           <TopDoctors stats={s} className="lg:col-span-2" />

@@ -10,6 +10,13 @@ export type AskResult = {
   unsupported: string[];
 };
 
+export type Insight = { kind: 'trend' | 'risk' | 'workload' | 'mix'; title: string; detail: string };
+export type InsightsResult = { range: string; generatedAt: string; basedOn: string; insights: Insight[]; dropped: number };
+
+export function getInsights(range: string, refresh = false) {
+  return apiFetch<InsightsResult>('/ai/insights', { query: { range, refresh: refresh ? '1' : undefined } });
+}
+
 export function getAIStatus() {
   return apiFetch<AIStatus>('/ai/status');
 }

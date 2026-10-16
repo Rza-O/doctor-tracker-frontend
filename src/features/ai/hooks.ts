@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useHydrated } from '@/hooks/use-hydrated';
 import * as aiApi from './api';
 import type { AskScope } from './api';
@@ -15,4 +15,26 @@ export function useAIEnabled() {
 
 export function useAsk(scope: AskScope) {
   return useMutation({ mutationFn: (query: string) => aiApi.ask(scope, query) });
+}
+
+const insightsKey = (range: string) => ['ai', 'insights', range] as const;
+
+/** Insights for a period — the server caches them 10 min, so we do too. */
+export function useInsights(range: string, enabled: boolean) {
+  return useQuery({
+    queryKey: insightsKey(range),
+    queryFn: () => aiApi.getInsights(range),
+    enabled,
+    staleTime: 10 * 60_000,
+    retry: 1,
+  });
+}
+
+/** "Regenerate": bypasses both caches and replaces the cached result. */
+export function useRegenerateInsights(range: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => aiApi.getInsights(range, true),
+    onSuccess: (data) => queryClient.setQueryData(insightsKey(range), data),
+  });
 }
