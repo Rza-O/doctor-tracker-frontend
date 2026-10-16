@@ -13,6 +13,7 @@ import { useStats } from '../hooks';
 import type { DashboardStats } from '../types';
 import { RANGES, statsUrlSchema } from '../url-schema';
 import { AdmissionsChart } from './admissions-chart';
+import { ConditionBreakdown, SpecialtyBreakdown, TopDoctors } from './breakdowns';
 import { PatientMix } from './patient-mix';
 import { StatTile } from './stat-tile';
 
@@ -78,6 +79,9 @@ export function DashboardView() {
         <div className={cn('grid gap-4 transition-opacity lg:grid-cols-3', refreshing && 'opacity-60')} aria-busy={refreshing}>
           <AdmissionsChart series={s.admissionsOverTime} className="lg:col-span-2" />
           <PatientMix stats={s} />
+          <TopDoctors stats={s} className="lg:col-span-2" />
+          <ConditionBreakdown stats={s} />
+          <SpecialtyBreakdown stats={s} className="lg:col-span-3" />
         </div>
       </section>
     </div>
