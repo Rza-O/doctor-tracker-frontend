@@ -13,6 +13,8 @@ type SetOptions = {
    * history isn't flooded with one entry per keystroke.
    */
   history?: 'push' | 'replace';
+  /** Filter/sort changes start again at page 1. Off for things like opening a side panel. */
+  resetPage?: boolean;
 };
 
 /**
@@ -31,7 +33,7 @@ export function useListParams<S extends z.ZodType>(schema: S) {
   const params = useMemo(() => schema.parse(Object.fromEntries(new URLSearchParams(query))) as z.output<S>, [schema, query]);
 
   const setParams = useCallback(
-    (patch: Record<string, ParamValue>, { history = 'push' }: SetOptions = {}) => {
+    (patch: Record<string, ParamValue>, { history = 'push', resetPage = true }: SetOptions = {}) => {
       const next = new URLSearchParams(query);
       for (const [key, value] of Object.entries(patch)) {
         const empty = value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0);
@@ -39,7 +41,7 @@ export function useListParams<S extends z.ZodType>(schema: S) {
         else next.set(key, Array.isArray(value) ? value.join(',') : String(value));
       }
       // Changing a filter or sort invalidates the current page number.
-      if (!('page' in patch)) next.delete('page');
+      if (resetPage && !('page' in patch)) next.delete('page');
 
       const qs = next.toString();
       const url = qs ? `${pathname}?${qs}` : pathname;

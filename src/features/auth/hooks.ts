@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { useHydrated } from '@/hooks/use-hydrated';
 import * as authApi from './api';
 import type { User } from './types';
 
@@ -18,9 +19,15 @@ export function useMe() {
   });
 }
 
-/** True only for admins — used to show/hide create, edit and delete actions. */
+/**
+ * True only for admins — used to show/hide create, edit and delete actions.
+ * Always false until hydration finishes: the server can't know the role, so
+ * role-dependent UI must render identically on server and first client pass.
+ */
 export function useIsAdmin() {
-  return useMe().data?.role === 'admin';
+  const hydrated = useHydrated();
+  const role = useMe().data?.role;
+  return hydrated && role === 'admin';
 }
 
 export function useLogin() {

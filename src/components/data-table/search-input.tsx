@@ -45,7 +45,10 @@ export function SearchInput({ value, onChange, placeholder, debounceMs = 300, cl
         <SearchIcon />
       </InputGroupAddon>
       <InputGroupInput
+        // type="search" for semantics and the mobile keyboard's search key; the
+        // browser's own clear (×) is hidden because we render a consistent one.
         type="search"
+        className="[&::-webkit-search-cancel-button]:appearance-none"
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder={placeholder}

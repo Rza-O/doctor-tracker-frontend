@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 import { AppHeader } from './app-header';
 import { AppSidebar } from './app-sidebar';
 import { BreadcrumbProvider } from './breadcrumbs';
@@ -27,7 +28,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         <AppSidebar />
         <SidebarInset>
           <AppHeader />
-          <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col p-4 outline-none md:p-6">
+          {/* Extra bottom space in development only, so the floating dev tools
+              (React Query devtools, Next indicator) never cover page controls. */}
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className={cn('flex flex-1 flex-col p-4 outline-none md:p-6', process.env.NODE_ENV === 'development' && 'pb-20 md:pb-20')}
+          >
             {children}
           </main>
         </SidebarInset>

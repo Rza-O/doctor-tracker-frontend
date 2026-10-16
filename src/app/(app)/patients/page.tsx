@@ -1,23 +1,21 @@
-import { UsersIcon } from 'lucide-react';
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
+import { TableSkeleton } from '@/components/data-table/table-skeleton';
 import { PageHeader } from '@/components/page-header';
-import { EmptyState } from '@/components/empty-state';
+import { PatientsTable } from '@/features/patients/components/patients-table';
 
 export const metadata: Metadata = { title: 'Patients' };
 
-// Placeholder until M8 (table, search, filters, edit, delete).
 export default function PatientsPage() {
   return (
     <>
       <PageHeader
         title="Patients"
-        description="Search and filter all patients by condition, severity, status and admission date."
+        description="Search and filter every patient. Open a row for details; new patients are added from their doctor's page."
       />
-      <EmptyState
-        icon={UsersIcon}
-        title="Patient list coming next"
-        description="Search, filters, pagination and editing will appear here."
-      />
+      <Suspense fallback={<TableSkeleton />}>
+        <PatientsTable />
+      </Suspense>
     </>
   );
 }
