@@ -7,17 +7,18 @@ export const SEVERITY: Record<Severity, { label: string; className: string; dot:
   stable: {
     label: 'Stable',
     className: 'bg-emerald-500/10 text-emerald-700 ring-emerald-600/20 dark:text-emerald-400 dark:ring-emerald-400/30',
-    dot: 'bg-emerald-500',
+    // Dots use the same status tokens as the dashboard charts → one meaning, one color.
+    dot: 'bg-(--status-good)',
   },
   moderate: {
     label: 'Moderate',
     className: 'bg-amber-500/10 text-amber-800 ring-amber-600/25 dark:text-amber-300 dark:ring-amber-400/30',
-    dot: 'bg-amber-500',
+    dot: 'bg-(--status-warning)',
   },
   critical: {
     label: 'Critical',
     className: 'bg-red-500/10 text-red-700 ring-red-600/20 dark:text-red-400 dark:ring-red-400/30',
-    dot: 'bg-red-500',
+    dot: 'bg-(--status-critical)',
   },
 };
 

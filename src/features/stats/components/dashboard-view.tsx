@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils';
 import { useStats } from '../hooks';
 import type { DashboardStats } from '../types';
 import { RANGES, statsUrlSchema } from '../url-schema';
+import { AdmissionsChart } from './admissions-chart';
+import { PatientMix } from './patient-mix';
 import { StatTile } from './stat-tile';
 
 const pct = (part: number, whole: number) => (whole ? `${Math.round((part / whole) * 100)}%` : '—');
@@ -73,8 +75,9 @@ export function DashboardView() {
           </ToggleGroup>
         </div>
 
-        <div className={cn('transition-opacity', refreshing && 'opacity-60')} aria-busy={refreshing}>
-          {/* Charts arrive in the next steps. */}
+        <div className={cn('grid gap-4 transition-opacity lg:grid-cols-3', refreshing && 'opacity-60')} aria-busy={refreshing}>
+          <AdmissionsChart series={s.admissionsOverTime} className="lg:col-span-2" />
+          <PatientMix stats={s} />
         </div>
       </section>
     </div>

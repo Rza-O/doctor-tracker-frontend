@@ -82,6 +82,19 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.6 0.118 184.704);
+
+  /* ── Data-viz tokens (validated with the palette script, see M9 notes) ── */
+  /* Single-series accent: teal-600 — passes lightness band, chroma ≥ 0.10 and
+     ≥ 3:1 contrast in both modes (brand teal-700 reads gray as a fill). */
+  --chart-accent: #0d9488;
+  /* Status scale for severity — reserved meaning, always with icon + label. */
+  --status-good: #0ca30c;
+  --status-warning: #fab219;
+  --status-critical: #d03b3b;
+  /* Ordinal ramp for the patient lifecycle (one hue; most active = strongest). */
+  --mix-admitted: #134e4a;
+  --mix-treatment: #0f766e;
+  --mix-discharged: #14b8a6;
 }
 
 .dark {
@@ -117,6 +130,13 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.704 0.14 182.503);
+
+  /* Dark mode is selected, not inverted: the ordinal ramp re-anchors so the
+     most active state is the brightest; status steps are mode-invariant. */
+  --chart-accent: #0d9488;
+  --mix-admitted: #5eead4;
+  --mix-treatment: #14b8a6;
+  --mix-discharged: #0f766e;
 }
 
 @layer base {
