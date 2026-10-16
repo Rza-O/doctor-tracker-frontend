@@ -1,17 +1,20 @@
-'use client';
+import { LayoutDashboardIcon } from 'lucide-react';
+import type { Metadata } from 'next';
+import { PageHeader } from '@/components/page-header';
+import { EmptyState } from '@/components/empty-state';
 
-import { useMe } from '@/features/auth/hooks';
+export const metadata: Metadata = { title: 'Dashboard' };
 
-// Temporary content until the real dashboard in M9.
+// Placeholder until M9 (charts and statistics).
 export default function DashboardPage() {
-  const { data: user } = useMe();
-
   return (
-    <div className="flex flex-col gap-1">
-      <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-      <p className="text-muted-foreground">
-        {user ? `Welcome back, ${user.name.split(' ')[0]}.` : 'Loading…'} Charts and statistics arrive in the next milestone.
-      </p>
-    </div>
+    <>
+      <PageHeader title="Dashboard" description="Key numbers and trends across doctors and patients." />
+      <EmptyState
+        icon={LayoutDashboardIcon}
+        title="Analytics coming next"
+        description="KPIs, admissions over time and patient breakdowns will appear here."
+      />
+    </>
   );
 }
