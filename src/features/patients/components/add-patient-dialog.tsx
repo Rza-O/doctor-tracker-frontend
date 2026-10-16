@@ -18,6 +18,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
+import type { IntakeResult } from '@/features/ai/api';
+import { IntakePanel } from '@/features/ai/components/intake-panel';
 import { applyServerErrors } from '@/lib/form-errors';
 import { zodResolver } from '@/lib/zod-resolver';
 import { useCreatePatient } from '../hooks';
@@ -48,10 +50,31 @@ export function AddPatientDialog({ doctorId, doctorName }: { doctorId: string; d
     defaultValues: emptyValues(),
   });
 
+  // Fields filled by smart intake keep a ✨ marker until the user edits them.
+  // (setValue doesn't fire the inputs' onChange, so only real edits clear it.)
+  const [aiFilled, setAiFilled] = useState<ReadonlySet<string>>(new Set());
+  const markReviewed = (name: string) =>
+    setAiFilled((prev) => {
+      if (!prev.has(name)) return prev;
+      const next = new Set(prev);
+      next.delete(name);
+      return next;
+    });
+
+  const applyIntake = (fields: IntakeResult['fields']) => {
+    for (const [key, value] of Object.entries(fields)) {
+      if (value === undefined) continue;
+      // Pre-fill only — validation runs as usual and nothing is submitted.
+      form.setValue(key as keyof PatientFormInput, String(value) as never, { shouldDirty: true, shouldValidate: true });
+    }
+    setAiFilled(new Set(Object.keys(fields)));
+  };
+
   const onOpenChange = (next: boolean) => {
     setOpen(next);
     if (!next) {
       form.reset(emptyValues());
+      setAiFilled(new Set());
       setFormError(null);
       createPatient.reset();
     }
@@ -78,8 +101,9 @@ export function AddPatientDialog({ doctorId, doctorName }: { doctorId: string; d
           <DialogTitle>Add patient</DialogTitle>
           <DialogDescription>The patient will be assigned to Dr. {doctorName}.</DialogDescription>
         </DialogHeader>
+        <IntakePanel onExtract={applyIntake} />
         <form id="add-patient-form" onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-          <PatientFormFields control={form.control} idPrefix="add-patient" />
+          <PatientFormFields control={form.control} idPrefix="add-patient" aiFilled={aiFilled} onUserEdit={markReviewed} />
           {formError && (
             <Alert variant="destructive" role="alert">
               <AlertDescription>{formError}</AlertDescription>

@@ -17,6 +17,10 @@ export function useAsk(scope: AskScope) {
   return useMutation({ mutationFn: (query: string) => aiApi.ask(scope, query) });
 }
 
+export function useIntake() {
+  return useMutation({ mutationFn: aiApi.extractIntake });
+}
+
 const insightsKey = (range: string) => ['ai', 'insights', range] as const;
 
 /** Insights for a period — the server caches them 10 min, so we do too. */

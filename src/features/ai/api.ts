@@ -17,6 +17,16 @@ export function getInsights(range: string, refresh = false) {
   return apiFetch<InsightsResult>('/ai/insights', { query: { range, refresh: refresh ? '1' : undefined } });
 }
 
+export type IntakeResult = {
+  fields: Partial<Record<'name' | 'age' | 'gender' | 'phone' | 'email' | 'condition' | 'severity' | 'status' | 'admissionDate', string | number>>;
+  missing: string[];
+  warnings: string[];
+};
+
+export function extractIntake(note: string) {
+  return apiFetch<IntakeResult>('/ai/intake', { method: 'POST', body: { note } });
+}
+
 export function getAIStatus() {
   return apiFetch<AIStatus>('/ai/status');
 }
