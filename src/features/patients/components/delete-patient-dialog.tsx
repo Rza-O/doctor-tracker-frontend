@@ -13,7 +13,6 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Spinner } from '@/components/ui/spinner';
 import { ApiError } from '@/lib/api-client';
 import { useDeletePatient } from '../hooks';
 import type { Patient } from '../types';
@@ -22,27 +21,31 @@ type Props = {
   /** Patient to delete; null = dialog closed. */
   patient: Pick<Patient, '_id' | 'name'> | null;
   onClose: () => void;
-  onDeleted?: () => void;
+  /**
+   * Runs as soon as the user confirms (the delete is optimistic, so the
+   * patient is already gone from the UI) — e.g. to close a side panel.
+   */
+  onConfirmed?: () => void;
 };
 
 /** "Are you sure?" step before a destructive, irreversible action. */
-export function DeletePatientDialog({ patient, onClose, onDeleted }: Props) {
+export function DeletePatientDialog({ patient, onClose, onConfirmed }: Props) {
   const deletePatient = useDeletePatient();
 
-  const confirm = () => {
+  const confirm = async () => {
     if (!patient) return;
-    deletePatient.mutate(patient._id, {
-      onSuccess: () => {
-        toast.success(`${patient.name} was deleted`);
-        onDeleted?.();
-      },
-      onError: (error) => {
-        // The optimistic removal was rolled back — say why.
-        toast.error(error instanceof ApiError ? error.message : 'Could not delete the patient');
-      },
-    });
-    // Close immediately: the row is already gone (optimistic update).
     onClose();
+    onConfirmed?.();
+    // mutateAsync, not mutate(…, { onSuccess }): this component may unmount
+    // right away (its parent panel closes), and React Query skips mutate()
+    // callbacks of unmounted components. A promise always settles.
+    try {
+      await deletePatient.mutateAsync(patient._id);
+      toast.success(`${patient.name} was deleted`);
+    } catch (error) {
+      // The optimistic removal was rolled back — say why.
+      toast.error(error instanceof ApiError ? error.message : 'Could not delete the patient');
+    }
   };
 
   return (
@@ -59,8 +62,7 @@ export function DeletePatientDialog({ patient, onClose, onDeleted }: Props) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={confirm} disabled={deletePatient.isPending}>
-            {deletePatient.isPending && <Spinner />}
+          <AlertDialogAction variant="destructive" onClick={confirm}>
             Delete patient
           </AlertDialogAction>
         </AlertDialogFooter>

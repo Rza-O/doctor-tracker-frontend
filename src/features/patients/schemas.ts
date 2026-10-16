@@ -25,7 +25,13 @@ export const patientFormSchema = z.object({
   admissionDate: z
     .string()
     .min(1, 'Admission date is required')
-    .refine((d) => d <= format(new Date(), 'yyyy-MM-dd'), 'Admission date cannot be in the future'),
+    .refine((d) => d <= format(new Date(), 'yyyy-MM-dd'), 'Admission date cannot be in the future')
+    // The date input gives a calendar day ("2026-10-17"). Sent bare, the server
+    // reads it as UTC midnight — which for users east of UTC (Dhaka, UTC+6) is
+    // still in the future early in the day, so "today" got rejected. Send the
+    // user's LOCAL midnight as a full timestamp instead: unambiguous, never in
+    // the future for today, and shown as the same day everywhere in that zone.
+    .transform((d) => new Date(`${d}T00:00:00`).toISOString()),
 });
 
 export type PatientFormInput = z.input<typeof patientFormSchema>;

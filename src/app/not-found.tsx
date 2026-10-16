@@ -1,7 +1,7 @@
 import { ArrowLeftIcon, CompassIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 
 export default function NotFound() {
   return (
@@ -17,9 +17,10 @@ export default function NotFound() {
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
       </div>
-      <Button render={<Link href="/dashboard" />}>
+      {/* A link styled as a button — navigation keeps link semantics. */}
+      <Link href="/dashboard" className={buttonVariants()}>
         <ArrowLeftIcon /> Back to dashboard
-      </Button>
+      </Link>
     </main>
   );
 }

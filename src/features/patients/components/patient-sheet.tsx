@@ -180,7 +180,7 @@ function PatientEditForm({ patient, onDeleted }: { patient: Patient; onDeleted: 
           </Button>
         </div>
       </SheetFooter>
-      <DeletePatientDialog patient={confirmDelete ? patient : null} onClose={() => setConfirmDelete(false)} onDeleted={onDeleted} />
+      <DeletePatientDialog patient={confirmDelete ? patient : null} onClose={() => setConfirmDelete(false)} onConfirmed={onDeleted} />
     </>
   );
 }

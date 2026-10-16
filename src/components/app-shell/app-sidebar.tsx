@@ -3,6 +3,7 @@
 import { EyeIcon, HeartPulseIcon, LayoutDashboardIcon, StethoscopeIcon, UsersIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Suspense } from 'react';
 import {
   Sidebar,
   SidebarContent,
@@ -26,11 +27,41 @@ const NAV_ITEMS = [
   { title: 'Patients', href: '/patients', icon: UsersIcon },
 ];
 
+/** Nav links; `activePath` null = no highlight (prerender fallback). */
+function NavMenu({ activePath }: { activePath: string | null }) {
+  const { isMobile, setOpenMobile } = useSidebar();
+  // On phones the sidebar is a drawer: close it once a link is chosen.
+  const closeOnMobile = () => isMobile && setOpenMobile(false);
+
+  return (
+    <SidebarMenu>
+      {NAV_ITEMS.map((item) => {
+        // Active for the section and anything under it (e.g. /doctors/123).
+        const isActive = activePath !== null && (activePath === item.href || activePath.startsWith(`${item.href}/`));
+        return (
+          <SidebarMenuItem key={item.href}>
+            <SidebarMenuButton
+              isActive={isActive}
+              tooltip={item.title}
+              render={<Link href={item.href} aria-current={isActive ? 'page' : undefined} onClick={closeOnMobile} />}
+            >
+              <item.icon />
+              <span>{item.title}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      })}
+    </SidebarMenu>
+  );
+}
+
+function ActiveNavMenu() {
+  return <NavMenu activePath={usePathname()} />;
+}
+
 export function AppSidebar() {
-  const pathname = usePathname();
   const { isMobile, setOpenMobile } = useSidebar();
   const isViewer = useMe().data?.role === 'viewer';
-  // On phones the sidebar is a drawer: close it once a link is chosen.
   const closeOnMobile = () => isMobile && setOpenMobile(false);
 
   return (
@@ -52,24 +83,11 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {NAV_ITEMS.map((item) => {
-                // Active for the section and anything under it (e.g. /doctors/123).
-                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      tooltip={item.title}
-                      render={<Link href={item.href} aria-current={isActive ? 'page' : undefined} onClick={closeOnMobile} />}
-                    >
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
+            {/* The current path isn't known while prerendering dynamic routes
+                (/doctors/[id]); show the menu without a highlight until it is. */}
+            <Suspense fallback={<NavMenu activePath={null} />}>
+              <ActiveNavMenu />
+            </Suspense>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
