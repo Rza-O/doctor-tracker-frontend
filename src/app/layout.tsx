@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Providers } from '@/components/providers';
 import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
 
 // Variable names match what globals.css (shadcn theme) expects.
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       <body className="flex min-h-full flex-col">
         <ThemeProvider>
           <Providers>{children}</Providers>
+          <Toaster richColors position="top-right" />
         </ThemeProvider>
       </body>
     </html>

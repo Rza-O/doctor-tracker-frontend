@@ -14,11 +14,15 @@ function makeQueryClient() {
       onError: (error) => {
         if (error instanceof ApiError && error.status === 401 && window.location.pathname !== '/login') {
           const next = encodeURIComponent(window.location.pathname + window.location.search);
-          // Deliberately a full page load, not router.push: this runs outside
-          // React (no router here), and a hard reload wipes all in-memory
-          // state — including cached patient data — when a session ends.
-          // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-          window.location.assign(`/login?next=${next}`);
+          // Clear the cookies first: a present-but-invalid access cookie would
+          // otherwise make the proxy bounce /login → /dashboard → /login forever.
+          // Then a deliberately full page load (not router.push): this runs
+          // outside React, and a hard reload wipes all in-memory state —
+          // including cached patient data — when a session ends.
+          fetch('/api/v1/auth/logout', { method: 'POST' })
+            .catch(() => undefined)
+            // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+            .finally(() => window.location.assign(`/login?next=${next}`));
         }
       },
     }),

@@ -1,12 +1,7 @@
-import { Button } from '@/components/ui/button';
+import { redirect } from 'next/navigation';
 
-// Temporary placeholder; becomes a redirect to /dashboard once auth exists.
+// "/" has no page of its own. The proxy already routes signed-out users to
+// /login; everyone else lands on the dashboard.
 export default function Home() {
-  return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
-      <h1 className="text-3xl font-semibold tracking-tight">Doctor Tracker</h1>
-      <p className="text-muted-foreground">Frontend scaffold is running.</p>
-      <Button>Primary button</Button>
-    </main>
-  );
+  redirect('/dashboard');
 }
