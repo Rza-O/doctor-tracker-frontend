@@ -1,31 +1,17 @@
 'use client';
 
-import { LogOutIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
-import { useLogout, useMe } from '@/features/auth/hooks';
+import { useMe } from '@/features/auth/hooks';
 
-// Temporary landing page to exercise the auth flow. M7 replaces it with the
-// real app shell (sidebar layout) and M9 with the dashboard.
+// Temporary content until the real dashboard in M9.
 export default function DashboardPage() {
-  const me = useMe();
-  const logout = useLogout();
+  const { data: user } = useMe();
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
-      {me.isPending ? (
-        <Spinner />
-      ) : me.data ? (
-        <>
-          <h1 className="text-2xl font-semibold tracking-tight">Hello, {me.data.name}</h1>
-          <p className="text-muted-foreground">
-            Signed in as {me.data.email} · role <span className="font-medium text-foreground">{me.data.role}</span>
-          </p>
-          <Button variant="outline" onClick={() => logout.mutate()} disabled={logout.isPending}>
-            <LogOutIcon /> Sign out
-          </Button>
-        </>
-      ) : null}
-    </main>
+    <div className="flex flex-col gap-1">
+      <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+      <p className="text-muted-foreground">
+        {user ? `Welcome back, ${user.name.split(' ')[0]}.` : 'Loading…'} Charts and statistics arrive in the next milestone.
+      </p>
+    </div>
   );
 }
