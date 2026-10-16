@@ -51,7 +51,10 @@ export function LoginForm() {
 
   // The proxy sends users here when the 15-min access cookie is gone. If their
   // 7-day refresh cookie is still valid, restore the session and go straight back.
+  // Only attempted when the readable `has_session` hint exists, so first-time
+  // visitors don't fire a refresh that can only fail.
   useEffect(() => {
+    if (!document.cookie.split('; ').some((c) => c.startsWith('has_session='))) return;
     let cancelled = false;
     refreshSession().then((ok) => {
       if (ok && !cancelled) router.replace(nextPath);

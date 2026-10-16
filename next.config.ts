@@ -22,6 +22,25 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [{ source: '/api/:path*', destination: `${API_URL}/api/:path*` }];
   },
+
+  // Baseline security headers for every page (the API sets its own via helmet).
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          // Nobody may embed the app in a frame → prevents clickjacking.
+          { key: 'X-Frame-Options', value: 'DENY' },
+          // Browsers must trust the declared Content-Type, never guess it.
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          // Send only the origin (not full URLs with patient filters) to other sites.
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          // The app needs none of these device features; deny them outright.
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
