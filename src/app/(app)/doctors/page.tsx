@@ -1,13 +1,14 @@
-import { PlusIcon, StethoscopeIcon } from 'lucide-react';
+import { PlusIcon } from 'lucide-react';
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
+import { TableSkeleton } from '@/components/data-table/table-skeleton';
 import { PageHeader } from '@/components/page-header';
-import { EmptyState } from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import { AdminOnly } from '@/features/auth/components/admin-only';
+import { DoctorsTable } from '@/features/doctors/components/doctors-table';
 
 export const metadata: Metadata = { title: 'Doctors' };
 
-// Placeholder until M8 (table, search, filters, pagination).
 export default function DoctorsPage() {
   return (
     <>
@@ -22,11 +23,10 @@ export default function DoctorsPage() {
           </AdminOnly>
         }
       />
-      <EmptyState
-        icon={StethoscopeIcon}
-        title="Doctor list coming next"
-        description="Search, filters and pagination will appear here."
-      />
+      {/* The table reads the URL (useSearchParams) → must be inside Suspense. */}
+      <Suspense fallback={<TableSkeleton />}>
+        <DoctorsTable />
+      </Suspense>
     </>
   );
 }
